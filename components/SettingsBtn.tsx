@@ -2,7 +2,11 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
 
-const SettingsBtn = () => {
+interface props {
+  disabled?: boolean;
+}
+
+const SettingsBtn = ({ disabled }: props) => {
   const styles = StyleSheet.create({
     main: {
       position: "absolute",
@@ -19,6 +23,7 @@ const SettingsBtn = () => {
   });
   return (
     <TouchableOpacity
+      disabled={disabled}
       style={styles.main}
       onPress={() => router.navigate("/settings")}
     >
