@@ -41,7 +41,7 @@ export default function RootLayout() {
             }}
           />
           <Stack.Screen
-            name="settings"
+            name="(settings)"
             options={{
               title: "Settings",
             }}

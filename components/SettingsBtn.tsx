@@ -25,7 +25,7 @@ const SettingsBtn = ({ disabled }: props) => {
     <TouchableOpacity
       disabled={disabled}
       style={styles.main}
-      onPress={() => router.navigate("/settings")}
+      onPress={() => router.navigate("/(settings)")}
     >
       <MaterialIcons name="settings" size={24} color="black" />
     </TouchableOpacity>
