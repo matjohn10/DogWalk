@@ -1,7 +1,7 @@
 import SettingsBtn from "@/components/SettingsBtn";
 import { Colors } from "@/constants/Colors";
 import TestData from "@/constants/TestData";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   StyleSheet,
   useColorScheme,
@@ -15,16 +15,26 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Feather from "@expo/vector-icons/Feather";
 import AlertModal from "@/components/AlertModal";
 import Checkbox from "expo-checkbox";
+import { useGetData, useStoreData } from "@/lib/asyncStorage";
 
 export default function Index() {
   const [enabledPathEdit, setEnabledPathEdit] = useState(false);
   const [path, setPath] = useState<LatLng[]>([]);
   const [paths, setPaths] = useState(TestData.paths);
 
+  const { data, isLoading } = useGetData("no-help");
+  const { mutateAsync: storeData } = useStoreData();
   // To store in local storage and retrieve on app booting
   const [prefersNoHelp, setPrefersNoHelp] = useState(false);
   const [noHelpChecked, setNoHelpChecked] = useState(false);
   const [pathAlert, setPathAlert] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && !!data) {
+      setPrefersNoHelp(data);
+      setNoHelpChecked(data);
+    }
+  }, [isLoading]);
 
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
@@ -235,8 +245,11 @@ export default function Index() {
               style={styles.btn}
               onPress={() => {
                 setPrefersNoHelp(noHelpChecked);
-                // if (noHelpChecked)
-                //   storeData("no-help", noHelpChecked.toString());
+                if (noHelpChecked)
+                  storeData({
+                    key: "no-help",
+                    value: noHelpChecked.toString(),
+                  });
               }}
             >
               <Text style={styles.text}>Close</Text>

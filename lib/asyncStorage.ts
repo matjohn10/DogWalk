@@ -1,4 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 const storeData = async (key: string, value: string) => {
   try {
@@ -23,5 +29,23 @@ const getData = async (key: string) => {
   }
 };
 
-export const useStoreData = () => {};
-export const useGetData = () => {};
+export function useStoreData() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    async mutationFn(data: { key: string; value: string }) {
+      await storeData(data.key, data.value);
+    },
+    async onSuccess(_, data) {
+      await queryClient.invalidateQueries({ queryKey: [data.key] });
+    },
+  });
+}
+export const useGetData = (key: string) => {
+  return useQuery({
+    queryKey: [key],
+    queryFn: async () => {
+      const help = await getData(key);
+      return !!help;
+    },
+  });
+};
