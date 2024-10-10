@@ -9,6 +9,7 @@ import {
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AuthProvider from "@/providers/AuthProvider";
 
 SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
@@ -32,21 +33,23 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <QueryClientProvider client={queryClient}>
-        <Stack>
-          <Stack.Screen
-            name="index"
-            options={{
-              title: "Map",
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="(settings)"
-            options={{
-              title: "Settings",
-            }}
-          />
-        </Stack>
+        <AuthProvider>
+          <Stack>
+            <Stack.Screen
+              name="index"
+              options={{
+                title: "Map",
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="(settings)"
+              options={{
+                title: "Settings",
+              }}
+            />
+          </Stack>
+        </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

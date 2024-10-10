@@ -1,4 +1,6 @@
 import { Colors } from "@/constants/Colors";
+import { supabase } from "@/lib/supabase";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   View,
@@ -9,6 +11,8 @@ import {
   useColorScheme,
 } from "react-native";
 
+const ERROR_MSG = "Problem signing up. Please try again.";
+
 const Register = ({
   setState,
 }: {
@@ -16,6 +20,7 @@ const Register = ({
 }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const theme = useColorScheme() ?? "light";
@@ -38,7 +43,7 @@ const Register = ({
       width: "100%",
       height: 50,
       backgroundColor: Colors[theme].text,
-      borderRadius: 25,
+      borderRadius: 10,
       paddingHorizontal: 15,
       marginVertical: 10,
       color: Colors[theme].background,
@@ -47,7 +52,7 @@ const Register = ({
       width: "100%",
       height: 50,
       backgroundColor: Colors[theme].text,
-      borderRadius: 25,
+      borderRadius: 10,
       justifyContent: "center",
       alignItems: "center",
       marginVertical: 10,
@@ -62,7 +67,28 @@ const Register = ({
       fontSize: 14,
       marginTop: 10,
     },
+    error: {
+      fontSize: 14,
+      color: Colors[theme].destructive,
+      fontWeight: "semibold",
+    },
   });
+
+  // TODO: setup Login
+  const handleSignup = async () => {
+    const token = await supabase.auth.signUp({ email, password });
+    if (token.error) {
+      setErrorMsg(ERROR_MSG);
+      return;
+    }
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setErrorMsg("");
+    router.dismissAll();
+    router.back();
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Register</Text>
@@ -84,14 +110,27 @@ const Register = ({
         secureTextEntry={true}
       />
       <TextInput
-        style={styles.input}
+        style={
+          confirmPassword !== password
+            ? {
+                ...styles.input,
+                borderWidth: 0.5,
+                borderColor: Colors[theme].destructive,
+              }
+            : styles.input
+        }
         placeholder="Confirm Password"
         placeholderTextColor="#aaa"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
         secureTextEntry={true}
       />
-      <TouchableOpacity style={styles.button}>
+      <Text style={styles.error}>{errorMsg}</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSignup}
+        disabled={password !== confirmPassword}
+      >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 

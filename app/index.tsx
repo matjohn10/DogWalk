@@ -16,6 +16,7 @@ import Feather from "@expo/vector-icons/Feather";
 import AlertModal from "@/components/AlertModal";
 import Checkbox from "expo-checkbox";
 import { useGetData, useStoreData } from "@/lib/asyncStorage";
+import { useAuth } from "../providers/AuthProvider";
 
 export default function Index() {
   const [enabledPathEdit, setEnabledPathEdit] = useState(false);
@@ -35,6 +36,8 @@ export default function Index() {
       setNoHelpChecked(data);
     }
   }, [isLoading]);
+
+  const { session } = useAuth();
 
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
@@ -139,8 +142,8 @@ export default function Index() {
             style={styles.addPath}
             onPress={() => {
               if (!enabledPathEdit) setPathAlert(true);
-              setEnabledPathEdit(true);
-              // setMenu([base, restore, delPath, save]);
+              if (!!session) setEnabledPathEdit(true);
+              else console.log("Not logged in");
             }}
           >
             <FontAwesome name="plus" size={24} color="black" />
