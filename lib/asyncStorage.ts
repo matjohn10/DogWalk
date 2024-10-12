@@ -1,10 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  QueryClient,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const storeData = async (key: string, value: string) => {
   try {
@@ -45,7 +40,7 @@ export const useGetData = (key: string) => {
     queryKey: [key],
     queryFn: async () => {
       const help = await getData(key);
-      return !!help;
+      return !!help ? help : "";
     },
   });
 };

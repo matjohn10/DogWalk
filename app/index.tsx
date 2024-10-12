@@ -1,6 +1,5 @@
 import SettingsBtn from "@/components/SettingsBtn";
 import { Colors } from "@/constants/Colors";
-import TestData from "@/constants/TestData";
 import { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -8,6 +7,8 @@ import {
   View,
   TouchableOpacity,
   Text,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import MapView, { LatLng, Polyline } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -17,27 +18,60 @@ import AlertModal from "@/components/AlertModal";
 import Checkbox from "expo-checkbox";
 import { useGetData, useStoreData } from "@/lib/asyncStorage";
 import { useAuth } from "../providers/AuthProvider";
+import { router } from "expo-router";
+import { Paths } from "@/types/paths";
+import { usePaths, useSavePath } from "@/queries/path-queries";
 
 export default function Index() {
+  const { session } = useAuth();
   const [enabledPathEdit, setEnabledPathEdit] = useState(false);
   const [path, setPath] = useState<LatLng[]>([]);
-  const [paths, setPaths] = useState(TestData.paths);
+  const [cloudPathsState, setCloudPathsStates] = useState<Paths>([]);
+  const [localPathsState, setLocalPathsStates] = useState<Paths>([]);
 
   const { data, isLoading } = useGetData("no-help");
-  const { mutateAsync: storeData } = useStoreData();
-  // To store in local storage and retrieve on app booting
+  const { data: localPaths, isLoading: areLocalPathsLoading } =
+    useGetData("paths");
+  const {
+    data: cloudPaths,
+    isLoading: areCloudPathsLoading,
+    isRefetching,
+  } = usePaths(session?.user.id);
+  const { mutateAsync: storeData, isPending } = useStoreData();
+
+  const { mutateAsync: savePath } = useSavePath();
+
   const [prefersNoHelp, setPrefersNoHelp] = useState(false);
   const [noHelpChecked, setNoHelpChecked] = useState(false);
   const [pathAlert, setPathAlert] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !!data) {
-      setPrefersNoHelp(data);
-      setNoHelpChecked(data);
+      setPrefersNoHelp(!!data);
+      setNoHelpChecked(!!data);
     }
   }, [isLoading]);
 
-  const { session } = useAuth();
+  useEffect(() => {
+    //console.log("Cloud:", cloudPaths);
+    if (!areCloudPathsLoading) {
+      if (!cloudPaths) setCloudPathsStates([]);
+      else {
+        setCloudPathsStates([...cloudPathsState, ...cloudPaths]);
+      }
+    }
+  }, [isRefetching, areCloudPathsLoading]);
+
+  useEffect(() => {
+    //console.log("Local:", localPaths);
+    if (!areLocalPathsLoading) {
+      if (!localPaths) setLocalPathsStates([]);
+      else {
+        const loadedPaths = JSON.parse(localPaths) as Paths;
+        setLocalPathsStates([...localPathsState, ...loadedPaths]);
+      }
+    }
+  }, [areLocalPathsLoading]);
 
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
@@ -101,6 +135,25 @@ export default function Index() {
     },
   });
 
+  const handleSavePath = () => {
+    if (!!session) {
+      if (path.length > 1) {
+        setCloudPathsStates([...cloudPathsState, path]);
+        setPath([]);
+        console.log("SAVE TO DB");
+        savePath({ id: session.user.id, path });
+      }
+    } else {
+      setLocalPathsStates([...localPathsState, path]);
+      setPath([]);
+      storeData({
+        key: "paths",
+        value: JSON.stringify([...localPathsState, path]),
+      });
+      setEnabledPathEdit(false);
+    }
+  };
+
   return (
     <View style={styles.main}>
       <MapView
@@ -112,7 +165,7 @@ export default function Index() {
         }}
         // onPanDrag={() => console.log("Pan")}
       >
-        {paths.map((p) => (
+        {[...localPathsState, ...cloudPathsState].map((p) => (
           <Polyline
             key={Math.random()}
             coordinates={p}
@@ -143,7 +196,23 @@ export default function Index() {
             onPress={() => {
               if (!enabledPathEdit) setPathAlert(true);
               if (!!session) setEnabledPathEdit(true);
-              else console.log("Not logged in");
+              else
+                Alert.alert(
+                  "Join Us?",
+                  "Login to share your walk paths with others! Cancel and save your paths on your device.",
+                  [
+                    {
+                      text: "Cancel",
+                      onPress: () => setEnabledPathEdit(true),
+                      style: "cancel",
+                    },
+                    {
+                      text: "Continue",
+                      onPress: () => router.navigate("/(settings)/auth"),
+                      style: "default",
+                    },
+                  ]
+                );
             }}
           >
             <FontAwesome name="plus" size={24} color="black" />
@@ -175,15 +244,13 @@ export default function Index() {
             <TouchableOpacity
               key={4}
               style={{ ...styles.addPath }}
-              onPress={() => {
-                if (path.length > 1) {
-                  setPaths([...paths, path]);
-                  setPath([]);
-                  console.log("SAVE TO DB");
-                }
-              }}
+              onPress={handleSavePath}
             >
-              <FontAwesome name="cloud-upload" size={20} color="black" />
+              {isPending ? (
+                <ActivityIndicator color={Colors[theme].text} size="small" />
+              ) : (
+                <FontAwesome name="cloud-upload" size={20} color="black" />
+              )}
             </TouchableOpacity>
           </View>
         ) : (
