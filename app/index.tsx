@@ -23,7 +23,7 @@ import { Paths } from "@/types/paths";
 import { usePaths, useSavePath } from "@/queries/path-queries";
 
 export default function Index() {
-  const { session } = useAuth();
+  const { session, userRegion } = useAuth();
   const [enabledPathEdit, setEnabledPathEdit] = useState(false);
   const [path, setPath] = useState<LatLng[]>([]);
   const [cloudPathsState, setCloudPathsStates] = useState<Paths>([]);
@@ -158,6 +158,7 @@ export default function Index() {
     <View style={styles.main}>
       <MapView
         style={styles.map}
+        region={userRegion}
         loadingEnabled
         loadingIndicatorColor={Colors[theme].text}
         onPress={(c) => {

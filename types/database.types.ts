@@ -11,16 +11,19 @@ export type Database = {
     Tables: {
       coordinates: {
         Row: {
+          index: number
           latitude: number
           longitude: number
           path_id: string
         }
         Insert: {
+          index: number
           latitude: number
           longitude: number
           path_id: string
         }
         Update: {
+          index?: number
           latitude?: number
           longitude?: number
           path_id?: string

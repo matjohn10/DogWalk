@@ -27,7 +27,15 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to facilitate path visualization.",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location to facilitate path visualization.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to facilitate path visualization."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

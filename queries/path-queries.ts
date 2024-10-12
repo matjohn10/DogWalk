@@ -9,12 +9,12 @@ export function usePaths(id: string | undefined) {
     queryKey: ["paths", id],
     queryFn: async () => {
         if (!id) return [];
-        const {data, error} = await supabase.from("paths").select("coordinates (latitude, longitude)").eq("walker_id", id);
+        const {data, error} = await supabase.from("paths").select("coordinates (latitude, longitude, index)").eq("walker_id", id);
         if (error || !data) {
             console.error(error)
             return [];
         };
-        const d = data.map(p => p.coordinates) as Paths;
+        const d = data.map(p => p.coordinates.sort((a, b) => a.index - b.index)) as Paths;
         // console.log("DATA:", d);
         return d;
     },
@@ -22,16 +22,15 @@ export function usePaths(id: string | undefined) {
 }
 
 export function useSavePath() {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   return useMutation({
     async mutationFn(data: { id: string; path: Path }) {
     const pathId = Crypto.randomUUID();
       const error  = await supabase.from("paths").insert({id: pathId, walker_id: data.id, created_at: dateString()})
       if (error.error) console.log("Path add:", error.error);
     
-      // TODO: Save the order as well using indexes
-      const toUpload = data.path.map(p => {
-        return {...p, path_id: pathId}
+      const toUpload = data.path.map((p, i) => {
+        return {...p, path_id: pathId, index: i}
       })
       const res = await supabase.from("coordinates").insert(toUpload)
       if (res.error) console.log("Coords add:", res.error);

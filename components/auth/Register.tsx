@@ -74,7 +74,6 @@ const Register = ({
     },
   });
 
-  // TODO: setup Login
   const handleSignup = async () => {
     const token = await supabase.auth.signUp({ email, password });
     if (token.error) {
