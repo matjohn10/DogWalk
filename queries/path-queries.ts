@@ -1,22 +1,40 @@
 import { supabase } from "@/lib/supabase";
-import { Path, Paths } from "@/types/paths";
-import { dateString } from "@/utils/helpers";
+import { Path, PathInfo, Paths } from "@/types/paths";
+import { CoordAvg, dateString } from "@/utils/helpers";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import * as Crypto from 'expo-crypto';
 
+
+// TODO: Filter paths out of a certain predetermined range
+// TODO: Display only one path or circle indicating a region with more than one paths (click it and show modal with all paths info + dogs)
 export function usePaths(id: string | undefined) {
+    return useQuery({
+      queryKey: ["paths", id],
+      queryFn: async () => {
+          if (!id) return [];
+          const {data, error} = await supabase.from("paths").select("*, coordinates (latitude, longitude, index)");
+          if (error || !data) {
+              console.error(error)
+              return [];
+          };
+          data.forEach(p => p.coordinates.sort((a, b) => a.index - b.index));
+          return data as PathInfo[];
+      },
+    });
+  }
+
+export function useMyPaths(id: string | undefined) {
   return useQuery({
     queryKey: ["paths", id],
     queryFn: async () => {
         if (!id) return [];
-        const {data, error} = await supabase.from("paths").select("coordinates (latitude, longitude, index)").eq("walker_id", id);
+        const {data, error} = await supabase.from("paths").select("*, coordinates (latitude, longitude, index)").eq("walker_id", id);
         if (error || !data) {
             console.error(error)
             return [];
         };
-        const d = data.map(p => p.coordinates.sort((a, b) => a.index - b.index)) as Paths;
-        // console.log("DATA:", d);
-        return d;
+        data.forEach(p => p.coordinates.sort((a, b) => a.index - b.index));
+        return data as PathInfo[];
     },
   });
 }
@@ -26,7 +44,9 @@ export function useSavePath() {
   return useMutation({
     async mutationFn(data: { id: string; path: Path }) {
     const pathId = Crypto.randomUUID();
-      const error  = await supabase.from("paths").insert({id: pathId, walker_id: data.id, created_at: dateString()})
+    const coordsAvg = CoordAvg(data.path);
+
+      const error  = await supabase.from("paths").insert({id: pathId, walker_id: data.id, avg_latitude: coordsAvg.latitude, avg_longitude: coordsAvg.longitude, created_at: dateString()})
       if (error.error) console.log("Path add:", error.error);
     
       const toUpload = data.path.map((p, i) => {

@@ -21,18 +21,21 @@ type Auth = {
   session: Session | null;
   isLoading: boolean;
   userRegion: Region;
+  loadingLocation: boolean;
 };
 
 const authContext = createContext<Auth>({
   session: null,
   isLoading: true,
   userRegion: OFFLINE_REGION,
+  loadingLocation: true,
 });
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userRegion, setUserRegion] = useState<Region>(OFFLINE_REGION);
+  const [loadingLocation, setLoadingLocation] = useState(true);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -51,18 +54,24 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        const lastKnown = await Location.getLastKnownPositionAsync();
-        if (!lastKnown) setUserRegion(OFFLINE_REGION);
-        else {
-          const region: Region = {
-            latitude: lastKnown.coords.latitude,
-            longitude: lastKnown.coords.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          };
-          setUserRegion(region);
-        }
+        setUserRegion(OFFLINE_REGION);
+        setLoadingLocation(false);
         return;
+      }
+
+      const lastKnown = await Location.getLastKnownPositionAsync();
+      if (!lastKnown) {
+        setUserRegion(OFFLINE_REGION);
+        setLoadingLocation(false);
+      } else {
+        const lastRegion: Region = {
+          latitude: lastKnown.coords.latitude,
+          longitude: lastKnown.coords.longitude,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        };
+        setUserRegion(lastRegion);
+        setLoadingLocation(false);
       }
 
       let location = await Location.getCurrentPositionAsync({});
@@ -73,11 +82,14 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         longitudeDelta: 0.0421,
       };
       setUserRegion(region);
+      setLoadingLocation(false);
     })();
   }, []);
 
   return (
-    <authContext.Provider value={{ session, isLoading, userRegion }}>
+    <authContext.Provider
+      value={{ session, isLoading, userRegion, loadingLocation }}
+    >
       {children}
     </authContext.Provider>
   );

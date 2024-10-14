@@ -38,18 +38,65 @@ export type Database = {
           },
         ]
       }
+      dogs: {
+        Row: {
+          alone: boolean
+          breed: string
+          created_at: string
+          id: string
+          path_id: string
+          personality: string
+          size: string
+          walk_time: string
+        }
+        Insert: {
+          alone: boolean
+          breed: string
+          created_at?: string
+          id?: string
+          path_id: string
+          personality: string
+          size: string
+          walk_time: string
+        }
+        Update: {
+          alone?: boolean
+          breed?: string
+          created_at?: string
+          id?: string
+          path_id?: string
+          personality?: string
+          size?: string
+          walk_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dogs_path_id_fkey"
+            columns: ["path_id"]
+            isOneToOne: false
+            referencedRelation: "paths"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       paths: {
         Row: {
+          avg_latitude: number
+          avg_longitude: number
           created_at: string | null
           id: string
           walker_id: string
         }
         Insert: {
+          avg_latitude: number
+          avg_longitude: number
           created_at?: string | null
           id: string
           walker_id: string
         }
         Update: {
+          avg_latitude?: number
+          avg_longitude?: number
           created_at?: string | null
           id?: string
           walker_id?: string

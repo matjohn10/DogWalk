@@ -19,14 +19,17 @@ import Checkbox from "expo-checkbox";
 import { useGetData, useStoreData } from "@/lib/asyncStorage";
 import { useAuth } from "../providers/AuthProvider";
 import { router } from "expo-router";
-import { Paths } from "@/types/paths";
+import { PathInfo, Paths } from "@/types/paths";
 import { usePaths, useSavePath } from "@/queries/path-queries";
+import LoadingModal from "@/components/LoadingModal";
+import Path from "@/components/Path";
+import PathEntryModal from "@/components/PathEntryModal";
 
 export default function Index() {
-  const { session, userRegion } = useAuth();
+  const { session, userRegion, loadingLocation } = useAuth();
   const [enabledPathEdit, setEnabledPathEdit] = useState(false);
   const [path, setPath] = useState<LatLng[]>([]);
-  const [cloudPathsState, setCloudPathsStates] = useState<Paths>([]);
+  const [cloudPathsState, setCloudPathsStates] = useState<PathInfo[]>([]);
   const [localPathsState, setLocalPathsStates] = useState<Paths>([]);
 
   const { data, isLoading } = useGetData("no-help");
@@ -45,6 +48,8 @@ export default function Index() {
   const [noHelpChecked, setNoHelpChecked] = useState(false);
   const [pathAlert, setPathAlert] = useState(false);
 
+  const [openPathEntryModal, setOpenPathEntryModal] = useState(false);
+
   useEffect(() => {
     if (!isLoading && !!data) {
       setPrefersNoHelp(!!data);
@@ -57,7 +62,7 @@ export default function Index() {
     if (!areCloudPathsLoading) {
       if (!cloudPaths) setCloudPathsStates([]);
       else {
-        setCloudPathsStates([...cloudPathsState, ...cloudPaths]);
+        setCloudPathsStates(cloudPaths);
       }
     }
   }, [isRefetching, areCloudPathsLoading]);
@@ -138,7 +143,7 @@ export default function Index() {
   const handleSavePath = () => {
     if (!!session) {
       if (path.length > 1) {
-        setCloudPathsStates([...cloudPathsState, path]);
+        // setCloudPathsStates([...cloudPathsState, path]);
         setPath([]);
         console.log("SAVE TO DB");
         savePath({ id: session.user.id, path });
@@ -166,14 +171,26 @@ export default function Index() {
         }}
         // onPanDrag={() => console.log("Pan")}
       >
-        {[...localPathsState, ...cloudPathsState].map((p) => (
-          <Polyline
-            key={Math.random()}
-            coordinates={p}
-            strokeWidth={5}
-            strokeColor="red"
+        {cloudPathsState.map((p) => (
+          <Path
+            key={p.id}
+            id={p.id}
+            coords={p.coordinates}
+            width={5}
+            color="red"
           />
         ))}
+
+        {localPathsState.map((p) => (
+          <Path
+            key={Math.random()}
+            id={"0"}
+            coords={p}
+            width={5}
+            color="blue"
+          />
+        ))}
+
         <Polyline coordinates={path} strokeWidth={5} strokeColor="white" />
       </MapView>
 
@@ -222,7 +239,13 @@ export default function Index() {
             <TouchableOpacity
               key={2}
               style={{ ...styles.addPath }}
-              onPress={() => setPath([])}
+              onPress={() => {
+                if (path.length > 0) {
+                  const newP = [...path];
+                  newP.pop();
+                  setPath(newP);
+                }
+              }}
             >
               <MaterialCommunityIcons name="restore" size={24} color="black" />
             </TouchableOpacity>
@@ -245,7 +268,15 @@ export default function Index() {
             <TouchableOpacity
               key={4}
               style={{ ...styles.addPath }}
-              onPress={handleSavePath}
+              onPress={() => {
+                if (path.length <= 1)
+                  Alert.alert(
+                    "Incomplete Path",
+                    "Your path must be more than 1 point.",
+                    [{ text: "Ok" }]
+                  );
+                else setOpenPathEntryModal(true);
+              }}
             >
               {isPending ? (
                 <ActivityIndicator color={Colors[theme].text} size="small" />
@@ -328,6 +359,14 @@ export default function Index() {
           </View>
         </View>
       </AlertModal>
+
+      <PathEntryModal
+        visible={openPathEntryModal}
+        setVisible={setOpenPathEntryModal}
+        callBackSave={handleSavePath}
+      />
+
+      <LoadingModal visible={loadingLocation} />
     </View>
   );
 }
