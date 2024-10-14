@@ -10,7 +10,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import MapView, { LatLng, Polyline } from "react-native-maps";
+import MapView, { LatLng, Marker, Polygon } from "react-native-maps";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Feather from "@expo/vector-icons/Feather";
@@ -19,36 +19,32 @@ import Checkbox from "expo-checkbox";
 import { useGetData, useStoreData } from "@/lib/asyncStorage";
 import { useAuth } from "../providers/AuthProvider";
 import { router } from "expo-router";
-import { PathInfo, Paths } from "@/types/paths";
-import { usePaths, useSavePath } from "@/queries/path-queries";
+import { useRegions, useSaveRegion } from "@/queries/region-queries";
 import LoadingModal from "@/components/LoadingModal";
-import Path from "@/components/Path";
-import PathEntryModal from "@/components/PathEntryModal";
+import { Region, RegionCoords } from "@/types/regions";
+import RegionMap from "@/components/RegionMap";
 
 export default function Index() {
   const { session, userRegion, loadingLocation } = useAuth();
-  const [enabledPathEdit, setEnabledPathEdit] = useState(false);
-  const [path, setPath] = useState<LatLng[]>([]);
-  const [cloudPathsState, setCloudPathsStates] = useState<PathInfo[]>([]);
-  const [localPathsState, setLocalPathsStates] = useState<Paths>([]);
+  const [enabledRegionEdit, setEnabledRegionEdit] = useState(false);
+  const [region, setRegion] = useState<LatLng[]>([]);
+  const [cloudRegionsState, setCloudRegionsStates] = useState<Region[]>([]);
 
   const { data, isLoading } = useGetData("no-help");
-  const { data: localPaths, isLoading: areLocalPathsLoading } =
-    useGetData("paths");
   const {
-    data: cloudPaths,
-    isLoading: areCloudPathsLoading,
+    data: cloudRegions,
+    isLoading: areCloudRegionsLoading,
     isRefetching,
-  } = usePaths(session?.user.id);
+  } = useRegions();
   const { mutateAsync: storeData, isPending } = useStoreData();
 
-  const { mutateAsync: savePath } = useSavePath();
+  const { mutateAsync: saveRegion } = useSaveRegion();
 
   const [prefersNoHelp, setPrefersNoHelp] = useState(false);
   const [noHelpChecked, setNoHelpChecked] = useState(false);
-  const [pathAlert, setPathAlert] = useState(false);
+  const [regionAlert, setRegionAlert] = useState(false);
 
-  const [openPathEntryModal, setOpenPathEntryModal] = useState(false);
+  const [openDogEntryModal, setOpenDogEntryModal] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !!data) {
@@ -59,24 +55,13 @@ export default function Index() {
 
   useEffect(() => {
     //console.log("Cloud:", cloudPaths);
-    if (!areCloudPathsLoading) {
-      if (!cloudPaths) setCloudPathsStates([]);
+    if (!areCloudRegionsLoading) {
+      if (!cloudRegions) setCloudRegionsStates([]);
       else {
-        setCloudPathsStates(cloudPaths);
+        setCloudRegionsStates(cloudRegions);
       }
     }
-  }, [isRefetching, areCloudPathsLoading]);
-
-  useEffect(() => {
-    //console.log("Local:", localPaths);
-    if (!areLocalPathsLoading) {
-      if (!localPaths) setLocalPathsStates([]);
-      else {
-        const loadedPaths = JSON.parse(localPaths) as Paths;
-        setLocalPathsStates([...localPathsState, ...loadedPaths]);
-      }
-    }
-  }, [areLocalPathsLoading]);
+  }, [isRefetching, areCloudRegionsLoading]);
 
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
@@ -140,22 +125,13 @@ export default function Index() {
     },
   });
 
-  const handleSavePath = () => {
+  const handleSaveRegion = () => {
     if (!!session) {
-      if (path.length > 1) {
-        // setCloudPathsStates([...cloudPathsState, path]);
-        setPath([]);
+      if (region.length === 4) {
+        setRegion([]);
         console.log("SAVE TO DB");
-        savePath({ id: session.user.id, path });
+        saveRegion({ id: session.user.id, coords: region });
       }
-    } else {
-      setLocalPathsStates([...localPathsState, path]);
-      setPath([]);
-      storeData({
-        key: "paths",
-        value: JSON.stringify([...localPathsState, path]),
-      });
-      setEnabledPathEdit(false);
     }
   };
 
@@ -167,35 +143,50 @@ export default function Index() {
         loadingEnabled
         loadingIndicatorColor={Colors[theme].text}
         onPress={(c) => {
-          if (enabledPathEdit) setPath([...path, c.nativeEvent.coordinate]);
+          if (enabledRegionEdit)
+            setRegion([...region, c.nativeEvent.coordinate]);
         }}
         // onPanDrag={() => console.log("Pan")}
       >
-        {cloudPathsState.map((p) => (
-          <Path
+        {cloudRegionsState.map((p) => (
+          <RegionMap
             key={p.id}
             id={p.id}
-            coords={p.coordinates}
+            coords={p.coordinates as RegionCoords}
             width={5}
             color="red"
           />
         ))}
 
-        {localPathsState.map((p) => (
-          <Path
-            key={Math.random()}
-            id={"0"}
-            coords={p}
-            width={5}
-            color="blue"
-          />
-        ))}
+        {/* VISUAL MARKERS WHEN MAKING REGION */}
+        {region.length < 3 ? (
+          region.map((r) => (
+            <Marker key={Math.random()} coordinate={r}>
+              <View
+                style={{
+                  position: "relative",
+                  width: 40,
+                  aspectRatio: 1,
+                }}
+              >
+                <MaterialCommunityIcons
+                  style={{ position: "absolute", top: -20 }}
+                  name="map-marker-check"
+                  size={40}
+                  color="black"
+                />
+              </View>
+            </Marker>
+          ))
+        ) : (
+          <></>
+        )}
 
-        <Polyline coordinates={path} strokeWidth={5} strokeColor="white" />
+        <Polygon coordinates={region} strokeWidth={5} strokeColor="white" />
       </MapView>
 
       {/* SETTINGS */}
-      <SettingsBtn disabled={enabledPathEdit} />
+      <SettingsBtn disabled={enabledRegionEdit} />
 
       {/* ADD PATH BUTTONS */}
       <View
@@ -212,76 +203,83 @@ export default function Index() {
             key={1}
             style={styles.addPath}
             onPress={() => {
-              if (!enabledPathEdit) setPathAlert(true);
-              if (!!session) setEnabledPathEdit(true);
+              if (!enabledRegionEdit) setRegionAlert(true);
+              if (!!session) setEnabledRegionEdit(true);
               else
-                Alert.alert(
-                  "Join Us?",
-                  "Login to share your walk paths with others! Cancel and save your paths on your device.",
-                  [
-                    {
-                      text: "Cancel",
-                      onPress: () => setEnabledPathEdit(true),
-                      style: "cancel",
-                    },
-                    {
-                      text: "Continue",
-                      onPress: () => router.navigate("/(settings)/auth"),
-                      style: "default",
-                    },
-                  ]
-                );
+                Alert.alert("Join Us?", "Login to create new walk regions!", [
+                  {
+                    text: "Cancel",
+                    style: "cancel",
+                  },
+                  {
+                    text: "Continue",
+                    onPress: () => router.navigate("/(settings)/auth"),
+                    style: "default",
+                  },
+                ]);
             }}
           >
-            <FontAwesome name="plus" size={24} color="black" />
+            <FontAwesome
+              name="plus"
+              size={24}
+              color={Colors[theme].background}
+            />
           </TouchableOpacity>
-          {enabledPathEdit ? (
+          {enabledRegionEdit ? (
             <TouchableOpacity
               key={2}
               style={{ ...styles.addPath }}
               onPress={() => {
-                if (path.length > 0) {
-                  const newP = [...path];
+                if (region.length > 0) {
+                  const newP = [...region];
                   newP.pop();
-                  setPath(newP);
+                  setRegion(newP);
                 }
               }}
             >
-              <MaterialCommunityIcons name="restore" size={24} color="black" />
+              <MaterialCommunityIcons
+                name="restore"
+                size={24}
+                color={Colors[theme].background}
+              />
             </TouchableOpacity>
           ) : (
             <></>
           )}
         </View>
-        {enabledPathEdit ? (
+        {enabledRegionEdit ? (
           <View style={styles.menuRow}>
             <TouchableOpacity
               key={3}
               style={{ ...styles.addPath }}
               onPress={() => {
-                setPath([]);
-                setEnabledPathEdit(false);
+                setRegion([]);
+                setEnabledRegionEdit(false);
               }}
             >
-              <Feather name="x" size={24} color="black" />
+              <Feather name="x" size={24} color={Colors[theme].background} />
             </TouchableOpacity>
             <TouchableOpacity
               key={4}
               style={{ ...styles.addPath }}
               onPress={() => {
-                if (path.length <= 1)
+                if (region.length !== 4)
                   Alert.alert(
-                    "Incomplete Path",
-                    "Your path must be more than 1 point.",
+                    "Incomplete Region",
+                    "Your region must be exactly 4 corners.",
                     [{ text: "Ok" }]
                   );
-                else setOpenPathEntryModal(true);
+                else handleSaveRegion(); //setOpenDogEntryModal(true);
               }}
             >
               {isPending ? (
                 <ActivityIndicator color={Colors[theme].text} size="small" />
               ) : (
-                <FontAwesome name="cloud-upload" size={20} color="black" />
+                <FontAwesome
+                  name="cloud-upload"
+                  size={20}
+                  color={Colors[theme].background}
+                />
               )}
             </TouchableOpacity>
           </View>
@@ -291,17 +289,21 @@ export default function Index() {
       </View>
 
       <AlertModal
-        visible={pathAlert && !prefersNoHelp}
-        setVisible={setPathAlert}
+        visible={regionAlert && !prefersNoHelp}
+        setVisible={setRegionAlert}
       >
         <View style={styles.alert}>
           <View style={{ width: "100%", alignItems: "flex-start" }}>
-            <Text style={styles.title}>How to add a walk path?</Text>
+            <Text style={styles.title}>How to add a region?</Text>
           </View>
           <View style={{ width: "100%", alignItems: "flex-start", gap: 10 }}>
             <View style={styles.helpItem}>
               <View style={styles.addPath}>
-                <FontAwesome name="plus" size={24} color="black" />
+                <FontAwesome
+                  name="plus"
+                  size={24}
+                  color={Colors[theme].background}
+                />
               </View>
               <Text style={styles.text}>Enter EDIT mode.</Text>
             </View>
@@ -310,22 +312,26 @@ export default function Index() {
                 <MaterialCommunityIcons
                   name="restore"
                   size={24}
-                  color="black"
+                  color={Colors[theme].background}
                 />
               </View>
               <Text style={styles.text}>Undo last change.</Text>
             </View>
             <View style={styles.helpItem}>
               <View style={styles.addPath}>
-                <Feather name="x" size={24} color="black" />
+                <Feather name="x" size={24} color={Colors[theme].background} />
               </View>
               <Text style={styles.text}>Exit EDIT mode.</Text>
             </View>
             <View style={styles.helpItem}>
               <View style={styles.addPath}>
-                <FontAwesome name="cloud-upload" size={20} color="black" />
+                <FontAwesome
+                  name="cloud-upload"
+                  size={20}
+                  color={Colors[theme].background}
+                />
               </View>
-              <Text style={styles.text}>Save the current walk path.</Text>
+              <Text style={styles.text}>Save the new region.</Text>
             </View>
           </View>
           <View
@@ -360,11 +366,11 @@ export default function Index() {
         </View>
       </AlertModal>
 
-      <PathEntryModal
-        visible={openPathEntryModal}
-        setVisible={setOpenPathEntryModal}
-        callBackSave={handleSavePath}
-      />
+      {/* <DogEntryModal
+        visible={openDogEntryModal}
+        setVisible={setOpenDogEntryModal}
+        callBackSave={handleSaveRegion}
+      /> */}
 
       <LoadingModal visible={loadingLocation} />
     </View>

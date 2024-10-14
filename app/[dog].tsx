@@ -1,25 +1,22 @@
+import SearchInput from "@/components/SearchInput";
 import { Colors } from "@/constants/Colors";
+import Data from "@/constants/Data";
+import { useSaveDog } from "@/queries/dogs-queries";
+import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
+import Checkbox from "expo-checkbox";
+import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
+  SafeAreaView,
   useColorScheme,
+  StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import Modal from "react-native-modal";
-import { useState } from "react";
-import Data from "@/constants/Data";
-import { FontAwesome, FontAwesome5 } from "@expo/vector-icons";
-import SearchInput from "./SearchInput";
-import Checkbox from "expo-checkbox";
 
-interface props {
-  visible: boolean;
-  setVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  callBackSave: () => void;
-}
-
-const PathEntryModal = ({ visible, setVisible, callBackSave }: props) => {
+const DogForm = () => {
   const [breed, setBreed] = useState("");
   const [breedVisible, setBreedVisible] = useState(false);
   const [size, setSize] = useState("");
@@ -29,6 +26,8 @@ const PathEntryModal = ({ visible, setVisible, callBackSave }: props) => {
   const [walkTime, setWalkTime] = useState("");
   const [walkTimeVisible, setWalkTimeVisible] = useState(false);
   const [alone, setAlone] = useState(false);
+  const local = useLocalSearchParams();
+  const { mutateAsync: saveDog, isPending } = useSaveDog();
 
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
@@ -40,8 +39,6 @@ const PathEntryModal = ({ visible, setVisible, callBackSave }: props) => {
       backgroundColor: Colors[theme].background,
       alignItems: "flex-start",
       gap: 15,
-      borderWidth: 1,
-      borderColor: "white",
     },
     title: {
       fontSize: 22,
@@ -91,15 +88,23 @@ const PathEntryModal = ({ visible, setVisible, callBackSave }: props) => {
     },
   });
 
-  const handleSave = () => {
-    callBackSave();
+  const handleSave = async () => {
     //TODO: Save the questionnaire data
+    await saveDog({
+      walk_time: walkTime,
+      personality,
+      size,
+      breed,
+      alone,
+      region_id: typeof local.dog === "string" ? local.dog : local.dog[0],
+    });
   };
-
   return (
-    <Modal isVisible={visible}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: Colors[theme].background }}
+    >
       <View style={styles.main}>
-        <Text style={styles.title}>Complete Your Path</Text>
+        <Text style={styles.title}>Share Your Dog Walk</Text>
         <TouchableOpacity
           onPress={() => setBreedVisible(true)}
           style={styles.itemBox}
@@ -208,12 +213,21 @@ const PathEntryModal = ({ visible, setVisible, callBackSave }: props) => {
         >
           <TouchableOpacity
             style={{ ...styles.btn, backgroundColor: Colors.light.destructive }}
-            onPress={() => setVisible(false)}
+            onPress={() => router.back()}
           >
-            <Text style={styles.btnText}>Cancel</Text>
+            <Text style={styles.btnText}>Back</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btn} onPress={handleSave}>
-            <Text style={styles.btnText}>Save</Text>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={handleSave}
+            disabled={!breed || !size || !personality || !walkTime}
+            touchSoundDisabled={!breed || !size || !personality || !walkTime}
+          >
+            {isPending ? (
+              <ActivityIndicator color={Colors[theme].text} size="small" />
+            ) : (
+              <Text style={styles.btnText}>Save</Text>
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -250,8 +264,8 @@ const PathEntryModal = ({ visible, setVisible, callBackSave }: props) => {
         setVisible={setWalkTimeVisible}
         setSelected={setWalkTime}
       />
-    </Modal>
+    </SafeAreaView>
   );
 };
 
-export default PathEntryModal;
+export default DogForm;

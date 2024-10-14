@@ -9,43 +9,14 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      coordinates: {
-        Row: {
-          index: number
-          latitude: number
-          longitude: number
-          path_id: string
-        }
-        Insert: {
-          index: number
-          latitude: number
-          longitude: number
-          path_id: string
-        }
-        Update: {
-          index?: number
-          latitude?: number
-          longitude?: number
-          path_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "coordinates_path_id_fkey"
-            columns: ["path_id"]
-            isOneToOne: false
-            referencedRelation: "paths"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       dogs: {
         Row: {
           alone: boolean
           breed: string
           created_at: string
           id: string
-          path_id: string
           personality: string
+          region_id: string
           size: string
           walk_time: string
         }
@@ -54,8 +25,8 @@ export type Database = {
           breed: string
           created_at?: string
           id?: string
-          path_id: string
           personality: string
+          region_id: string
           size: string
           walk_time: string
         }
@@ -64,47 +35,44 @@ export type Database = {
           breed?: string
           created_at?: string
           id?: string
-          path_id?: string
           personality?: string
+          region_id?: string
           size?: string
           walk_time?: string
         }
         Relationships: [
           {
-            foreignKeyName: "dogs_path_id_fkey"
-            columns: ["path_id"]
+            foreignKeyName: "dogs_region_id_fkey"
+            columns: ["region_id"]
             isOneToOne: false
-            referencedRelation: "paths"
+            referencedRelation: "regions"
             referencedColumns: ["id"]
           },
         ]
       }
-      paths: {
+      regions: {
         Row: {
-          avg_latitude: number
-          avg_longitude: number
-          created_at: string | null
+          coordinates: Json
+          created_at: string
+          creator_id: string
           id: string
-          walker_id: string
         }
         Insert: {
-          avg_latitude: number
-          avg_longitude: number
-          created_at?: string | null
-          id: string
-          walker_id: string
+          coordinates: Json
+          created_at?: string
+          creator_id?: string
+          id?: string
         }
         Update: {
-          avg_latitude?: number
-          avg_longitude?: number
-          created_at?: string | null
+          coordinates?: Json
+          created_at?: string
+          creator_id?: string
           id?: string
-          walker_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "paths_walker_id_fkey"
-            columns: ["walker_id"]
+            foreignKeyName: "regions_creator_id_fkey"
+            columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "walkers"
             referencedColumns: ["id"]

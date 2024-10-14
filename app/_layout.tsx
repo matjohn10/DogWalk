@@ -48,6 +48,22 @@ export default function RootLayout() {
                 title: "Settings",
               }}
             />
+            <Stack.Screen
+              name="[dog]"
+              options={{
+                title: "Form",
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
+            <Stack.Screen
+              name="region"
+              options={{
+                title: "Region",
+                headerShown: false,
+                presentation: "modal",
+              }}
+            />
           </Stack>
         </AuthProvider>
       </QueryClientProvider>

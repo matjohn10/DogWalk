@@ -1,14 +1,28 @@
 import { supabase } from "@/lib/supabase";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { InsertDog } from "@/types/regions";
 
 
-export function useDogs(path_id: string) {
+export function useDogs(region_id: string) {
     return useQuery({
-        queryKey: ["dogs", path_id],
+        queryKey: ["dogs", region_id],
         queryFn: async () => {
-            const {data, error} = await supabase.from("dogs").select("*").eq("path_id", path_id);
+            const {data, error} = await supabase.from("dogs").select("*").eq("region_id", region_id);
             if (error || !data) return [];
             return data;
+        }
+    })
+}
+
+export function useSaveDog() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        async mutationFn(data: InsertDog) {
+            const {error} = await supabase.from("dogs").insert(data);
+            if (error) console.error("INSERT DOG:", error);
+        },
+        async onSuccess(_, data) {
+            await queryClient.invalidateQueries({ queryKey: ["dogs", data.region_id] });
         }
     })
 }

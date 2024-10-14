@@ -13,16 +13,14 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { useGetData, useStoreData } from "@/lib/asyncStorage";
-import { Paths } from "@/types/paths";
 import * as Crypto from "expo-crypto";
 import { dateString } from "@/utils/helpers";
-import { useSavePath } from "@/queries/path-queries";
+import { Region } from "react-native-maps";
 
 const settings = () => {
   const { session } = useAuth();
   const { data: localPaths } = useGetData("paths");
   const { mutateAsync: storeData } = useStoreData();
-  const { mutateAsync: savePath, isPending } = useSavePath();
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
     main: {
@@ -61,23 +59,17 @@ const settings = () => {
     },
   });
 
-  const handleShareLocalPaths = async () => {
-    if (!!localPaths && !!session) {
-      const paths = JSON.parse(localPaths) as Paths;
-      // const pathIds = paths.map((p) => {
-      //   return {
-      //     id: Crypto.randomUUID(),
-      //     walker_id: session?.user.id,
-      //     created_at: dateString(),
-      //   };
-      // });
-      for (let path of paths) {
-        await savePath({ id: session.user.id, path });
-      }
+  // const handleShareLocalPaths = async () => {
+  //   if (!!localPaths && !!session) {
+  //     const paths = JSON.parse(localPaths) as Region[];
 
-      storeData({ key: "paths", value: "" });
-    }
-  };
+  //     for (let path of paths) {
+  //       await savePath({ id: session.user.id, path });
+  //     }
+
+  //     storeData({ key: "paths", value: "" });
+  //   }
+  // };
   return (
     <View style={styles.main}>
       <View style={styles.block}>
@@ -126,7 +118,7 @@ const settings = () => {
               />
             </TouchableOpacity>
           )}
-          {!!session && !!localPaths ? (
+          {/* {!!session && !!localPaths ? (
             <TouchableOpacity
               onPress={handleShareLocalPaths}
               style={styles.contentItem}
@@ -153,7 +145,7 @@ const settings = () => {
             </TouchableOpacity>
           ) : (
             <></>
-          )}
+          )} */}
           <TouchableOpacity onPress={() => {}} style={styles.contentItem}>
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
