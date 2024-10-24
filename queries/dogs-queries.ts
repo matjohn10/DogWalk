@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { InsertDog } from "@/types/regions";
+import { Dog } from "@/types/dogs";
 
 
 export function useDogs(region_id: string) {
@@ -9,7 +10,7 @@ export function useDogs(region_id: string) {
         queryFn: async () => {
             const {data, error} = await supabase.from("dogs").select("*").eq("region_id", region_id);
             if (error || !data) return [];
-            return data;
+            return data as Dog[];
         }
     })
 }

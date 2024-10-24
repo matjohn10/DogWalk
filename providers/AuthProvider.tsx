@@ -54,6 +54,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
+        console.log("Location not granted");
         setUserRegion(OFFLINE_REGION);
         setLoadingLocation(false);
         return;
@@ -61,9 +62,11 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
       const lastKnown = await Location.getLastKnownPositionAsync();
       if (!lastKnown) {
+        console.log("Do not know old location");
         setUserRegion(OFFLINE_REGION);
         setLoadingLocation(false);
       } else {
+        console.log("Know last location");
         const lastRegion: Region = {
           latitude: lastKnown.coords.latitude,
           longitude: lastKnown.coords.longitude,
@@ -74,6 +77,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         setLoadingLocation(false);
       }
 
+      console.log("Saving new location");
       let location = await Location.getCurrentPositionAsync({});
       const region: Region = {
         latitude: location.coords.latitude,

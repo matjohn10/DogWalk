@@ -15,7 +15,7 @@ export function useRegions() {
               return [];
           };
           //data.forEach(p => p.coordinates.sort((a, b) => a.index - b.index));
-          console.log("SERVER:", data)
+          //console.log("SERVER:", data)
           return data as Region[];
       },
     });

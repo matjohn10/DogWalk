@@ -89,7 +89,6 @@ const DogForm = () => {
   });
 
   const handleSave = async () => {
-    //TODO: Save the questionnaire data
     await saveDog({
       walk_time: walkTime,
       personality,
@@ -98,6 +97,8 @@ const DogForm = () => {
       alone,
       region_id: typeof local.dog === "string" ? local.dog : local.dog[0],
     });
+
+    router.back();
   };
   return (
     <SafeAreaView
