@@ -11,6 +11,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
+import * as Linking from "expo-linking";
 
 const settings = () => {
   const { session } = useAuth();
@@ -155,6 +156,28 @@ const settings = () => {
                 color={Colors[theme].text}
               />
               <Text style={styles.itemText}>Licenses</Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={Colors[theme].text}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              Linking.openURL("https://github.com/matjohn10/DogWalk")
+            }
+            style={styles.contentItem}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+            >
+              <MaterialCommunityIcons
+                name="github"
+                size={24}
+                color={Colors[theme].text}
+              />
+              <Text style={styles.itemText}>Project</Text>
             </View>
             <MaterialIcons
               name="chevron-right"

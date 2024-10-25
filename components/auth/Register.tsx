@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from "react-native";
+import * as AppleAuthentication from "expo-apple-authentication";
 
 const ERROR_MSG = "Problem signing up. Please try again.";
 
@@ -132,6 +133,35 @@ const Register = ({
       >
         <Text style={styles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
+      <AppleAuthentication.AppleAuthenticationButton
+        buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+        buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+        cornerRadius={5}
+        style={styles.button}
+        onPress={async () => {
+          try {
+            const credential = await AppleAuthentication.signInAsync({
+              requestedScopes: [
+                AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+                AppleAuthentication.AppleAuthenticationScope.EMAIL,
+              ],
+            });
+            if (credential.identityToken) {
+              const { error } = await supabase.auth.signInWithIdToken({
+                provider: "apple",
+                token: credential.identityToken,
+              });
+              //console.log(JSON.stringify({ error, user }, null, 2));
+              if (!error) {
+                router.navigate("/");
+              }
+            }
+            // signed in
+          } catch (e) {
+            console.log(e, typeof e);
+          }
+        }}
+      />
 
       <TouchableOpacity onPress={() => setState(true)}>
         <Text style={styles.utilityText}>Already registered? Log in</Text>

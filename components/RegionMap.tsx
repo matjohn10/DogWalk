@@ -10,10 +10,9 @@ interface props {
   id: string;
   coords: LatLng[];
   width: number;
-  color: string;
 }
 
-const RegionMap = ({ id, coords, width, color }: props) => {
+const RegionMap = ({ id, coords, width }: props) => {
   const { regionTheme } = useAuth();
   const [regionColor, setRegionColor] = useState(
     GetColorFromThemes(regionTheme)
@@ -27,6 +26,7 @@ const RegionMap = ({ id, coords, width, color }: props) => {
   const handlePress = () => {
     router.navigate(`/region?id=${id}`);
   };
+  // TODO: Prevent regions from overlapping
   return (
     <Polygon
       coordinates={coords}

@@ -90,6 +90,8 @@ const SearchInput = ({
     input: {
       color: Colors[theme].text,
       width: "90%",
+
+      padding: 10,
     },
     list: {
       width: "100%",
@@ -142,6 +144,8 @@ const SearchInput = ({
               style={{
                 width: "100%",
                 padding: 10,
+                borderBottomWidth: 0.5,
+                borderBottomColor: Colors[theme].shade,
               }}
               onPress={() => {
                 setSelected(i.item.value);

@@ -23,9 +23,10 @@ import { useRegions, useSaveRegion } from "@/queries/region-queries";
 import LoadingModal from "@/components/LoadingModal";
 import { Region, RegionCoords } from "@/types/regions";
 import RegionMap from "@/components/RegionMap";
+import { GetColorFromThemes } from "@/utils/helpers";
 
 export default function Index() {
-  const { session, userRegion, loadingLocation } = useAuth();
+  const { session, userRegion, loadingLocation, regionTheme } = useAuth();
   const [enabledRegionEdit, setEnabledRegionEdit] = useState(false);
   const [region, setRegion] = useState<LatLng[]>([]);
   const [cloudRegionsState, setCloudRegionsStates] = useState<Region[]>([]);
@@ -44,7 +45,12 @@ export default function Index() {
   const [noHelpChecked, setNoHelpChecked] = useState(false);
   const [regionAlert, setRegionAlert] = useState(false);
 
-  const [openDogEntryModal, setOpenDogEntryModal] = useState(false);
+  const [regionColor, setRegionColor] = useState(
+    GetColorFromThemes(regionTheme)
+  );
+  useEffect(() => {
+    setRegionColor(GetColorFromThemes(regionTheme));
+  }, [regionTheme]);
 
   useEffect(() => {
     if (!isLoading && !!data) {
@@ -85,7 +91,7 @@ export default function Index() {
       height: "100%",
     },
     addPath: {
-      backgroundColor: "white",
+      backgroundColor: Colors[theme].text,
       padding: 5,
       borderRadius: 10,
       width: 32,
@@ -153,8 +159,7 @@ export default function Index() {
             key={p.id}
             id={p.id}
             coords={p.coordinates as RegionCoords}
-            width={5}
-            color="red"
+            width={4}
           />
         ))}
 
@@ -173,7 +178,9 @@ export default function Index() {
                   style={{ position: "absolute", top: -20 }}
                   name="map-marker-check"
                   size={40}
-                  color="black"
+                  color={
+                    regionTheme === "default" ? Colors[theme].text : regionColor
+                  }
                 />
               </View>
             </Marker>
@@ -182,7 +189,13 @@ export default function Index() {
           <></>
         )}
 
-        <Polygon coordinates={region} strokeWidth={5} strokeColor="white" />
+        <Polygon
+          coordinates={region}
+          strokeWidth={4}
+          strokeColor={
+            regionTheme === "default" ? Colors[theme].text : regionColor
+          }
+        />
       </MapView>
 
       {/* SETTINGS */}
@@ -269,11 +282,14 @@ export default function Index() {
                     "Your region must be exactly 4 corners.",
                     [{ text: "Ok" }]
                   );
-                else handleSaveRegion(); //setOpenDogEntryModal(true);
+                else handleSaveRegion();
               }}
             >
               {isPending ? (
-                <ActivityIndicator color={Colors[theme].text} size="small" />
+                <ActivityIndicator
+                  color={Colors[theme].background}
+                  size="small"
+                />
               ) : (
                 <FontAwesome
                   name="cloud-upload"
@@ -365,12 +381,6 @@ export default function Index() {
           </View>
         </View>
       </AlertModal>
-
-      {/* <DogEntryModal
-        visible={openDogEntryModal}
-        setVisible={setOpenDogEntryModal}
-        callBackSave={handleSaveRegion}
-      /> */}
 
       <LoadingModal visible={loadingLocation} />
     </View>
