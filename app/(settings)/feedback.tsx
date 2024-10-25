@@ -107,7 +107,7 @@ const feedback = () => {
           <View style={styles.feedbackBlock}>
             <Text style={styles.header}>Body:</Text>
             <TextInput
-              placeholder="Write your feedback here..."
+              placeholder="Write your feedback or question here..."
               style={{ ...styles.subjectInput, ...styles.bodyInput }}
               value={body}
               onChangeText={setBody}

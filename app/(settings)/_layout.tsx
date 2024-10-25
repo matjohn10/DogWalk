@@ -36,14 +36,6 @@ const SettingsLayout = () => {
         }}
       />
       <Stack.Screen
-        name="help"
-        options={{
-          title: "Help",
-          headerShown: false,
-          presentation: "modal",
-        }}
-      />
-      <Stack.Screen
         name="licenses"
         options={{
           title: "Licenses",

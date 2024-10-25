@@ -22,6 +22,8 @@ type Auth = {
   isLoading: boolean;
   userRegion: Region;
   loadingLocation: boolean;
+  regionTheme: string;
+  setRegionTheme: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const authContext = createContext<Auth>({
@@ -29,6 +31,8 @@ const authContext = createContext<Auth>({
   isLoading: true,
   userRegion: OFFLINE_REGION,
   loadingLocation: true,
+  regionTheme: "default",
+  setRegionTheme: () => "",
 });
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
@@ -36,6 +40,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userRegion, setUserRegion] = useState<Region>(OFFLINE_REGION);
   const [loadingLocation, setLoadingLocation] = useState(true);
+
+  const [regionTheme, setRegionTheme] = useState("default");
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -92,7 +98,14 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
 
   return (
     <authContext.Provider
-      value={{ session, isLoading, userRegion, loadingLocation }}
+      value={{
+        session,
+        isLoading,
+        userRegion,
+        loadingLocation,
+        regionTheme,
+        setRegionTheme,
+      }}
     >
       {children}
     </authContext.Provider>

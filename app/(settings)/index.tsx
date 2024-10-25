@@ -114,7 +114,7 @@ const settings = () => {
                 size={24}
                 color={Colors[theme].text}
               />
-              <Text style={styles.itemText}>Colours</Text>
+              <Text style={styles.itemText}>Map Theme</Text>
             </View>
             <MaterialIcons
               name="chevron-right"
@@ -135,26 +135,6 @@ const settings = () => {
                 color={Colors[theme].text}
               />
               <Text style={styles.itemText}>Feedback</Text>
-            </View>
-            <MaterialIcons
-              name="chevron-right"
-              size={24}
-              color={Colors[theme].text}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => router.navigate("/help")}
-            style={styles.contentItem}
-          >
-            <View
-              style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
-            >
-              <MaterialCommunityIcons
-                name="chat-question"
-                size={24}
-                color={Colors[theme].text}
-              />
-              <Text style={styles.itemText}>Help</Text>
             </View>
             <MaterialIcons
               name="chevron-right"

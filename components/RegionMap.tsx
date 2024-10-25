@@ -1,4 +1,9 @@
+import { Colors } from "@/constants/Colors";
+import { useAuth } from "@/providers/AuthProvider";
+import { GetColorFromThemes } from "@/utils/helpers";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { useColorScheme } from "react-native";
 import { LatLng, Polygon } from "react-native-maps";
 
 interface props {
@@ -9,6 +14,16 @@ interface props {
 }
 
 const RegionMap = ({ id, coords, width, color }: props) => {
+  const { regionTheme } = useAuth();
+  const [regionColor, setRegionColor] = useState(
+    GetColorFromThemes(regionTheme)
+  );
+  const theme = useColorScheme() ?? "light";
+
+  useEffect(() => {
+    setRegionColor(GetColorFromThemes(regionTheme));
+  }, [regionTheme]);
+
   const handlePress = () => {
     router.navigate(`/region?id=${id}`);
   };
@@ -16,8 +31,12 @@ const RegionMap = ({ id, coords, width, color }: props) => {
     <Polygon
       coordinates={coords}
       strokeWidth={width}
-      strokeColor={color}
-      fillColor="rgba(155,155,155,0.6)"
+      strokeColor={regionTheme === "default" ? Colors[theme].text : regionColor}
+      fillColor={
+        regionTheme === "default"
+          ? Colors[theme].text + "50"
+          : regionColor + "50"
+      }
       onPress={handlePress}
     />
   );

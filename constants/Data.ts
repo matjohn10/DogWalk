@@ -478,7 +478,21 @@ export default {
        {key: "Evening: 5 to 9pm", value: "Evening"},
        {key: "Late Evening: 9 to 12am", value: "Late Evening"},
        {key: "Night: 12 to 4am", value: "Night"}
-    ]
+    ],
+    themes: 
+        {
+            seasons: [
+                {name: "summer", colors: ["#87A2FF", "#C4D7FF", "#FFD7C4", "#FFF4B5"]}, {name: "winter", colors: ["#F3F3E0", "#133E87", "#608BC1", "#CBDCEB"]}, {name: "fall", colors: ["#FFBB5C", "#FF9B50", "#E25E3E", "#C63D2F"]}, {name: "spring", colors: ["#FF8A8A", "#F4DEB3", "#F0EAAC", "#CCE0AC"]}
+            ],
+            colors: [
+                {name: "default", colors: ["#FFFFFF", "#000000"]},{name: "blue", colors:["#77E4C8", "#36C2CE", "#478CCF", "#4535C1"]},{name: "red", colors: ["#C70039", "#FF6969", "#952323", "#B80000"]},{name: "green", colors: ["#31511E", "#859F3D", "#898121", "#CBD2A4"]},
+            ],
+            environment: [
+                {name: "flowers", colors: ["#f6829f", "#ffbbc2", "#ffdddd", "#8b9c80"]},{name: "wood", colors: ["#E4E0E1", "#D6C0B3", "#AB886D", "#493628"]},{name: "forest", colors: ["#E9EED9", "#CBD2A4", "#9A7E6F", "#54473F"]},{name: "dunes", colors: ["#FFF2D7", "#FFE0B5", "#F8C794", "#D8AE7E"]},{name: "ocean", colors: ["#DFF2EB", "#B9E5E8", "#7AB2D3", "#4A628A"]}
+            ]
+        },
+    
 }
 
 export type Data = {key: string; value: string};
+
