@@ -11,7 +11,6 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
-import { useGetData, useStoreData } from "@/lib/asyncStorage";
 
 const settings = () => {
   const { session } = useAuth();
@@ -58,7 +57,6 @@ const settings = () => {
   return (
     <View style={styles.main}>
       <View style={styles.block}>
-        {/* <Text style={styles.blockHeader}>General</Text> */}
         <View style={styles.blockContent}>
           {!!session ? (
             <></>
