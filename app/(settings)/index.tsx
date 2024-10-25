@@ -6,21 +6,16 @@ import {
   TouchableOpacity,
   StyleSheet,
   useColorScheme,
-  ActivityIndicator,
 } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useAuth } from "@/providers/AuthProvider";
 import { supabase } from "@/lib/supabase";
 import { useGetData, useStoreData } from "@/lib/asyncStorage";
-import * as Crypto from "expo-crypto";
-import { dateString } from "@/utils/helpers";
-import { Region } from "react-native-maps";
 
 const settings = () => {
   const { session } = useAuth();
-  const { data: localPaths } = useGetData("paths");
-  const { mutateAsync: storeData } = useStoreData();
+
   const theme = useColorScheme() ?? "light";
   const styles = StyleSheet.create({
     main: {
@@ -38,19 +33,20 @@ const settings = () => {
       fontWeight: "600",
     },
     blockContent: {
-      borderWidth: 0.5,
+      // borderWidth: 0.5,
       borderRadius: 8,
-      borderColor: "gray",
+      // borderColor: "gray",
       width: "100%",
-      gap: 5,
-      paddingVertical: 5,
+      gap: 10,
     },
     contentItem: {
       width: "100%",
-      paddingVertical: 5,
+      paddingVertical: 15,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      borderBottomColor: Colors[theme].shade,
+      borderBottomWidth: 0.5,
     },
     itemText: {
       color: Colors[theme].text,
@@ -59,43 +55,13 @@ const settings = () => {
     },
   });
 
-  // const handleShareLocalPaths = async () => {
-  //   if (!!localPaths && !!session) {
-  //     const paths = JSON.parse(localPaths) as Region[];
-
-  //     for (let path of paths) {
-  //       await savePath({ id: session.user.id, path });
-  //     }
-
-  //     storeData({ key: "paths", value: "" });
-  //   }
-  // };
   return (
     <View style={styles.main}>
       <View style={styles.block}>
-        <Text style={styles.blockHeader}>General</Text>
+        {/* <Text style={styles.blockHeader}>General</Text> */}
         <View style={styles.blockContent}>
           {!!session ? (
-            <TouchableOpacity
-              onPress={() => console.log("Profile - show fun stats")}
-              style={styles.contentItem}
-            >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
-              >
-                <MaterialIcons
-                  name="person"
-                  size={24}
-                  color={Colors[theme].text}
-                />
-                <Text style={styles.itemText}>Profile</Text>
-              </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={24}
-                color={Colors[theme].text}
-              />
-            </TouchableOpacity>
+            <></>
           ) : (
             <TouchableOpacity
               onPress={() => router.navigate("/auth")}
@@ -118,44 +84,99 @@ const settings = () => {
               />
             </TouchableOpacity>
           )}
-          {/* {!!session && !!localPaths ? (
-            <TouchableOpacity
-              onPress={handleShareLocalPaths}
-              style={styles.contentItem}
-            >
-              <View
-                style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
-              >
-                {isPending ? (
-                  <ActivityIndicator color={Colors[theme].text} size="small" />
-                ) : (
-                  <MaterialIcons
-                    name="ios-share"
-                    size={24}
-                    color={Colors[theme].text}
-                  />
-                )}
-                <Text style={styles.itemText}>Share your paths</Text>
-              </View>
-              <MaterialIcons
-                name="chevron-right"
-                size={24}
-                color={Colors[theme].text}
-              />
-            </TouchableOpacity>
-          ) : (
-            <></>
-          )} */}
-          <TouchableOpacity onPress={() => {}} style={styles.contentItem}>
+          <TouchableOpacity
+            onPress={() => router.navigate("/about")}
+            style={styles.contentItem}
+          >
             <View
               style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
             >
               <MaterialCommunityIcons
-                name="map-marker-distance"
+                name="script-text-outline"
                 size={24}
                 color={Colors[theme].text}
               />
-              <Text style={styles.itemText}>Change Units</Text>
+              <Text style={styles.itemText}>About</Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={Colors[theme].text}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate("/colours")}
+            style={styles.contentItem}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+            >
+              <MaterialCommunityIcons
+                name="format-color-fill"
+                size={24}
+                color={Colors[theme].text}
+              />
+              <Text style={styles.itemText}>Colours</Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={Colors[theme].text}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate("/feedback")}
+            style={styles.contentItem}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+            >
+              <MaterialCommunityIcons
+                name="message-text-outline"
+                size={24}
+                color={Colors[theme].text}
+              />
+              <Text style={styles.itemText}>Feedback</Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={Colors[theme].text}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate("/help")}
+            style={styles.contentItem}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+            >
+              <MaterialCommunityIcons
+                name="chat-question"
+                size={24}
+                color={Colors[theme].text}
+              />
+              <Text style={styles.itemText}>Help</Text>
+            </View>
+            <MaterialIcons
+              name="chevron-right"
+              size={24}
+              color={Colors[theme].text}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate("/licenses")}
+            style={styles.contentItem}
+          >
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 5 }}
+            >
+              <MaterialCommunityIcons
+                name="newspaper-variant-outline"
+                size={24}
+                color={Colors[theme].text}
+              />
+              <Text style={styles.itemText}>Licenses</Text>
             </View>
             <MaterialIcons
               name="chevron-right"

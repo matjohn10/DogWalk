@@ -10,6 +10,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AuthProvider from "@/providers/AuthProvider";
+import { Colors } from "@/constants/Colors";
 
 SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
@@ -46,6 +47,9 @@ export default function RootLayout() {
               name="(settings)"
               options={{
                 title: "Settings",
+                headerStyle: {
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
+                },
               }}
             />
             <Stack.Screen
