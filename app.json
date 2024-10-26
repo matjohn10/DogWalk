@@ -13,13 +13,13 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.matj10.DogMap",
       "usesAppleSignIn": true,
-      "buildNumber": 3,
+      "buildNumber": "5",
       "icon": "./assets/images/icon.png",
       "splash": {
-        "image": "./assets/splash.png",
+        "image": "./assets/images/splash.png",
         "resizeMode": "contain",
         "backgroundColor": "#ffffff"
       }
@@ -46,9 +46,9 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to facilitate path visualization.",
-          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location to facilitate path visualization.",
-          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to facilitate path visualization."
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to facilitate region visualization.",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location to facilitate region visualization.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location to facilitate region visualization."
         }
       ]
     ],
