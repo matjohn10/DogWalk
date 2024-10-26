@@ -374,6 +374,7 @@ export default function Index() {
                     key: "no-help",
                     value: noHelpChecked.toString(),
                   });
+                setRegionAlert(false);
               }}
             >
               <Text style={styles.text}>Close</Text>

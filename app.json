@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "DogMap",
-    "slug": "DogMap",
+    "slug": "dogmap",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,14 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.matj10.DogMap",
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "buildNumber": 3,
+      "icon": "./assets/images/icon.png",
+      "splash": {
+        "image": "./assets/splash.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -47,6 +54,12 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "febd8e75-4b29-4308-9358-2e06a4e8f0ef"
+      }
+    },
+    "owner": "matj10"
   }
 }
